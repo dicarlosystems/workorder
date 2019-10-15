@@ -1,0 +1,17 @@
+{
+    "name": "WorkOrder",
+    "alias": "workorder",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\WorkOrder\\Providers\\WorkOrderServiceProvider"
+    ],
+    "aliases":{},
+    "files": [
+        "start.php"
+    ],
+    "icon": "medkit",
+    "plural": "workorder"
+}
