@@ -3,16 +3,17 @@
 namespace Modules\WorkOrder\Repositories;
 
 use DB;
-use Modules\Workorder\Models\Workorder;
+use App\Models\Client;
+use Modules\Workorder\Models\WorkOrder;
 use App\Ninja\Repositories\BaseRepository;
 //use App\Events\WorkorderWasCreated;
 //use App\Events\WorkorderWasUpdated;
 
-class WorkorderRepository extends BaseRepository
+class WorkOrderRepository extends BaseRepository
 {
     public function getClassName()
     {
-        return 'Modules\Workorder\Models\Workorder';
+        return 'Modules\Workorder\Models\WorkOrder';
     }
 
     public function all()
@@ -24,15 +25,21 @@ class WorkorderRepository extends BaseRepository
 
     public function find($filter = null, $userId = false)
     {
-        $query = DB::table('workorder')
-                    ->where('workorder.account_id', '=', \Auth::user()->account_id)
+        $query = DB::table('workorders')
+                    ->join('clients', 'workorders.client_id', '=', 'clients.id')
+                    ->where('workorders.account_id', '=', \Auth::user()->account_id)
                     ->select(
-                        
-                        'workorder.public_id',
-                        'workorder.deleted_at',
-                        'workorder.created_at',
-                        'workorder.is_deleted',
-                        'workorder.user_id'
+                        'workorders.client_id',
+                        'workorders.workorder_date',
+                        'workorders.synopsis',
+                        'workorders.problem_description',
+                        'workorders.public_id',
+                        'workorders.deleted_at',
+                        'workorders.created_at',
+                        'workorders.is_deleted',
+                        'workorders.user_id',
+                        'clients.name as client_name',
+                        'clients.public_id as client_public_id'
                     );
 
         $this->applyFilters($query, 'workorder');
@@ -52,9 +59,12 @@ class WorkorderRepository extends BaseRepository
 
     public function save($data, $workorder = null)
     {
-        $entity = $workorder ?: Workorder::createNew();
+        $entity = $workorder ?: WorkOrder::createNew();
+        $client = Client::findOrFail($data['client_id']);
+        $entity->client()->associate($client);
 
         $entity->fill($data);
+
         $entity->save();
 
         /*

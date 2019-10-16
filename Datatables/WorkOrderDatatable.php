@@ -10,12 +10,36 @@ use App\Ninja\Datatables\EntityDatatable;
 class WorkOrderDatatable extends EntityDatatable
 {
     public $entityType = 'workorder';
-    public $sortCol = 1;
+    public $sortCol = 2;
 
     public function columns()
     {
         return [
             
+
+            [
+                'date',
+                function ($model) {
+                    return Utils::fromSqlDate($model->workorder_date);
+                },
+            ],
+            [
+                'client_name',
+                function($model) {
+                    $model->entityType = ENTITY_CLIENT;
+                    if(Auth::user()->can('viewModel', $model)) {
+                        return link_to("clients/{$model->client_public_id}", Utils::getClientDisplayName($model))->toHtml();
+                    } else {
+                        return Utils::getClientDisplayName($model);
+                    }
+                },
+            ],
+            [
+                'synopsis',
+                function ($model) {
+                    return $model->synopsis;
+                },
+            ],
             [
                 'created_at',
                 function ($model) {
@@ -31,7 +55,7 @@ class WorkOrderDatatable extends EntityDatatable
             [
                 mtrans('workorder', 'edit_workorder'),
                 function ($model) {
-                    return URL::to("workorder/{$model->public_id}/edit");
+                    return URL::to("workorders/{$model->public_id}/edit");
                 },
                 function ($model) {
                     return Auth::user()->can('editByOwner', ['workorder', $model->user_id]);

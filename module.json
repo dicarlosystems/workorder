@@ -1,6 +1,6 @@
 {
     "name": "WorkOrder",
-    "alias": "workorder",
+    "alias": "workorders",
     "description": "",
     "keywords": [],
     "active": 1,
@@ -13,5 +13,5 @@
         "start.php"
     ],
     "icon": "medkit",
-    "plural": "workorder"
+    "plural": "workorders"
 }

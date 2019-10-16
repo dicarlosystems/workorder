@@ -4,6 +4,7 @@ namespace Modules\WorkOrder\Http\Controllers;
 
 use Auth;
 use App\Http\Controllers\BaseController;
+use App\Models\Client;
 use App\Services\DatatableService;
 use Modules\WorkOrder\Datatables\WorkOrderDatatable;
 use Modules\WorkOrder\Repositories\WorkOrderRepository;
@@ -32,7 +33,7 @@ class WorkOrderController extends BaseController
         return view('list_wrapper', [
             'entityType' => 'workorder',
             'datatable' => new WorkOrderDatatable(),
-            'title' => mtrans('workorder', 'workorder_list'),
+            'title' => mtrans('workorder', 'workorder_list')
         ]);
     }
 
@@ -53,11 +54,16 @@ class WorkOrderController extends BaseController
      */
     public function create(WorkOrderRequest $request)
     {
+        $clients = Client::all()->map(function($item) {
+            return ['value' => $item->name . ' - ' . $item->id_number, 'key' => $item->id];
+        })->pluck('value', 'key');
+
         $data = [
             'workorder' => null,
             'method' => 'POST',
-            'url' => 'workorder',
+            'url' => 'workorders',
             'title' => mtrans('workorder', 'new_workorder'),
+            'clients' => $clients,
         ];
 
         return view('workorder::edit', $data);
@@ -70,6 +76,7 @@ class WorkOrderController extends BaseController
      */
     public function store(CreateWorkOrderRequest $request)
     {
+        dump($request->input());
         $workorder = $this->workorderRepo->save($request->input());
 
         return redirect()->to($workorder->present()->editUrl)
@@ -87,7 +94,7 @@ class WorkOrderController extends BaseController
         $data = [
             'workorder' => $workorder,
             'method' => 'PUT',
-            'url' => 'workorder/' . $workorder->public_id,
+            'url' => 'workorders/' . $workorder->public_id,
             'title' => mtrans('workorder', 'edit_workorder'),
         ];
 
@@ -100,7 +107,7 @@ class WorkOrderController extends BaseController
      */
     public function show(WorkOrderRequest $request)
     {
-        return redirect()->to("workorder/{$request->workorder}/edit");
+        return redirect()->to("workorders/{$request->workorder}/edit");
     }
 
     /**
@@ -125,7 +132,7 @@ class WorkOrderController extends BaseController
         $ids = request()->input('public_id') ?: request()->input('ids');
         $count = $this->workorderRepo->bulk($ids, $action);
 
-        return redirect()->to('workorder')
+        return redirect()->to('workorders')
             ->with('message', mtrans('workorder', $action . '_workorder_complete'));
     }
 }

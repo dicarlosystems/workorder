@@ -19,7 +19,14 @@ class WorkOrderNote extends EntityModel
     /**
      * @var string
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'note',
+        'note_date',
+    ];
+
+    protected $dates = [
+        'note_date',
+    ];
 
     /**
      * @var string
