@@ -76,7 +76,6 @@ class WorkOrderController extends BaseController
      */
     public function store(CreateWorkOrderRequest $request)
     {
-        dump($request->input());
         $workorder = $this->workorderRepo->save($request->input());
 
         return redirect()->to($workorder->present()->editUrl)
@@ -91,11 +90,16 @@ class WorkOrderController extends BaseController
     {
         $workorder = $request->entity();
 
+        $clients = Client::all()->map(function($item) {
+            return ['value' => $item->name . ' - ' . $item->id_number, 'key' => $item->id];
+        })->pluck('value', 'key');
+
         $data = [
             'workorder' => $workorder,
             'method' => 'PUT',
             'url' => 'workorders/' . $workorder->public_id,
             'title' => mtrans('workorder', 'edit_workorder'),
+            'clients' => $clients,
         ];
 
         return view('workorder::edit', $data);

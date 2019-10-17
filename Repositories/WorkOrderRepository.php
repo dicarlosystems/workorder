@@ -4,7 +4,7 @@ namespace Modules\WorkOrder\Repositories;
 
 use DB;
 use App\Models\Client;
-use Modules\Workorder\Models\WorkOrder;
+use Modules\WorkOrder\Models\WorkOrder;
 use App\Ninja\Repositories\BaseRepository;
 //use App\Events\WorkorderWasCreated;
 //use App\Events\WorkorderWasUpdated;
