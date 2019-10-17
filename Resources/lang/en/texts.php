@@ -19,6 +19,7 @@ $LANG = array(
     'note' => 'Note',
     'empty_notes_table' => 'There are no notes attached to this work order.',
     'add_note' => 'Add Note',
+    'work_order_number' => 'Work Order Number',
 );
 
 return $LANG;

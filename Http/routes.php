@@ -4,6 +4,7 @@ Route::group(['middleware' => ['web', 'lookup:user', 'auth:user'], 'namespace' =
 {
     Route::resource('workorders', 'WorkOrderController');
     Route::post('workorders/bulk', 'WorkOrderController@bulk');
+    Route::post('workorders/{workorder}/addnote', 'WorkOrderController@addNote');
     Route::get('api/workorders', 'WorkOrderController@datatable');
 });
 

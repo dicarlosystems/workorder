@@ -16,7 +16,7 @@ class CreateWorkOrderNotesTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('user_id')->index();
             $table->unsignedInteger('account_id')->index();
-            $table->unsignedInteger('workorder_id')->index();
+            $table->unsignedInteger('work_order_id')->index();
             $table->string('note');
 
             $table->timestamps();
@@ -25,7 +25,7 @@ class CreateWorkOrderNotesTable extends Migration
 
             $table->foreign('account_id')->references('id')->on('accounts')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('workorder_id')->references('id')->on('workorders')->onDelete('cascade');
+            $table->foreign('work_order_id')->references('id')->on('workorders')->onDelete('cascade');
             
             $table->unsignedInteger('public_id')->index();
         });

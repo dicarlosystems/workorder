@@ -6,6 +6,7 @@ use DB;
 use App\Models\Client;
 use Modules\WorkOrder\Models\WorkOrder;
 use App\Ninja\Repositories\BaseRepository;
+use Utils;
 //use App\Events\WorkorderWasCreated;
 //use App\Events\WorkorderWasUpdated;
 
@@ -29,8 +30,9 @@ class WorkOrderRepository extends BaseRepository
                     ->join('clients', 'workorders.client_id', '=', 'clients.id')
                     ->where('workorders.account_id', '=', \Auth::user()->account_id)
                     ->select(
+                        'workorders.id as work_order_number',
                         'workorders.client_id',
-                        'workorders.workorder_date',
+                        'workorders.work_order_date',
                         'workorders.synopsis',
                         'workorders.problem_description',
                         'workorders.public_id',
@@ -64,6 +66,7 @@ class WorkOrderRepository extends BaseRepository
         $entity->client()->associate($client);
 
         $entity->fill($data);
+        $entity->work_order_date = Utils::toSqlDate($data['work_order_date']);
 
         $entity->save();
 

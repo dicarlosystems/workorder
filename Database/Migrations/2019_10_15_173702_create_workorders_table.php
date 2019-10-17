@@ -17,7 +17,7 @@ class CreateWorkOrdersTable extends Migration
             $table->unsignedInteger('user_id')->index();
             $table->unsignedInteger('account_id')->index();
             $table->unsignedInteger('client_id')->index();
-            $table->date("workorder_date");
+            $table->date("work_order_date");
             $table->string('synopsis', 80);
             $table->string('problem_description');
             $table->string('resolution');

@@ -21,12 +21,11 @@ class WorkOrderNote extends EntityModel
      */
     protected $fillable = [
         'note',
-        'note_date',
+        'workorder_id',
+        'client_id'
     ];
 
-    protected $dates = [
-        'note_date',
-    ];
+    protected $touches = ['workorder'];
 
     /**
      * @var string
@@ -36,6 +35,16 @@ class WorkOrderNote extends EntityModel
     public function getEntityType()
     {
         return 'workorder_note';
+    }
+
+    public function workorder()
+    {
+        return $this->belongsTo('Modules\WorkOrder\Models\WorkOrder');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User');
     }
 
 }

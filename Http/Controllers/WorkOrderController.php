@@ -6,11 +6,13 @@ use Auth;
 use App\Http\Controllers\BaseController;
 use App\Models\Client;
 use App\Services\DatatableService;
+use Modules\WorkOrder\Models\WorkOrderNote;
 use Modules\WorkOrder\Datatables\WorkOrderDatatable;
 use Modules\WorkOrder\Repositories\WorkOrderRepository;
 use Modules\WorkOrder\Http\Requests\WorkOrderRequest;
 use Modules\WorkOrder\Http\Requests\CreateWorkOrderRequest;
 use Modules\WorkOrder\Http\Requests\UpdateWorkOrderRequest;
+use Utils;
 
 class WorkOrderController extends BaseController
 {
@@ -90,9 +92,13 @@ class WorkOrderController extends BaseController
     {
         $workorder = $request->entity();
 
+        $notes = $workorder->has('notes')->get();
+
         $clients = Client::all()->map(function($item) {
             return ['value' => $item->name . ' - ' . $item->id_number, 'key' => $item->id];
         })->pluck('value', 'key');
+
+        $workorder->work_order_date = Utils::fromSqlDate($workorder->work_order_date);
 
         $data = [
             'workorder' => $workorder,
@@ -100,9 +106,22 @@ class WorkOrderController extends BaseController
             'url' => 'workorders/' . $workorder->public_id,
             'title' => mtrans('workorder', 'edit_workorder'),
             'clients' => $clients,
+            'notes' => $notes,
         ];
 
         return view('workorder::edit', $data);
+    }
+
+    public function addNote(WorkOrderRequest $request)
+    {
+        $workorder = $request->entity();
+        $note = WorkOrderNote::createNew();
+
+        $note->fill($request->input());
+
+        $workorder->notes()->save($note);
+
+        return redirect()->to("workorders/{$request->workorder}/edit");
     }
 
     /**

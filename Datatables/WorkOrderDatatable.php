@@ -15,12 +15,17 @@ class WorkOrderDatatable extends EntityDatatable
     public function columns()
     {
         return [
-            
-
             [
-                'date',
+                'id',
                 function ($model) {
-                    return Utils::fromSqlDate($model->workorder_date);
+                    return link_to("workorders/{$model->work_order_number}", $model->work_order_number)->toHtml();
+                }
+            ],
+            [
+                'work_order_date',
+                function ($model) {
+                    // return Utils::fromSqlDateTime($model->work_order_date);
+                    return $model->work_order_date;
                 },
             ],
             [
