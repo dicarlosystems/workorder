@@ -92,8 +92,6 @@ class WorkOrderController extends BaseController
     {
         $workorder = $request->entity();
 
-        // $notes = $workorder->notes()->exists() ? $workorder::with('notes.user')->orderBy('notes.get() : [];
-
         $notes = WorkOrderNote::where('work_order_id', '=', $workorder->id)->orderBy('created_at', 'desc')->get();
 
         $clients = Client::all()->map(function($item) {
@@ -123,7 +121,11 @@ class WorkOrderController extends BaseController
 
         $workorder->notes()->save($note);
 
-        return redirect()->to("workorders/{$request->workorder}/edit");
+        $html = view('workorder::partials.note', ['note' => $note])->render();
+
+        // return redirect()->to("workorders/{$request->workorder}/edit");
+        // return response()->json(['html' => $html]);
+        return response()->json(['html' => $html]);
     }
 
     /**
