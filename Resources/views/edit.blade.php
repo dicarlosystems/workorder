@@ -44,35 +44,100 @@
         </div>
     </div>
 
+    <style>
+
+ul.timeline {
+    list-style-type: none;
+    position: relative;
+}
+ul.timeline:before {
+    content: ' ';
+    background: #d4d9df;
+    display: inline-block;
+    position: absolute;
+    left: 29px;
+    width: 2px;
+    height: 100%;
+    z-index: 400;
+}
+ul.timeline > li {
+    margin: 20px 0;
+    padding-left: 20px;
+}
+ul.timeline > li:before {
+    content: ' ';
+    background: white;
+    display: inline-block;
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid #22c0e8;
+    left: 20px;
+    width: 20px;
+    height: 20px;
+    z-index: 400;
+}
+</style>
+@if($workorder)
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title in-white">
-                        <i class="glyphicon glyphicon-pencil"></i> {{ mtrans('workorder', 'notes') }}
+                        <i class="glyphicon glyphicon-pushpin"></i> {{ mtrans('workorder', 'notes') }}
                     </h3>
                 </div>
                 <div class="panel-body">
-                    {{-- @if($workorder->notes()->exists()) --}}
-                    {{-- <table class="table table-striped">
-
-                    <tbody>
-                        @foreach($workorder->notes as $note)
-                            <tr>
-                                <td>{{ $note->created_at }}</td>
-                                <td>{{ $note->note }}</td>
-                                <td>{{ $note->user }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                    </table> --}}
-                    {{-- @else
-                        <p>There are no notes yet for this work order</p>
-                    @endif --}}
+                    <div class="input-group">
+                        <textarea class="form-control" name="add_note" style="resize:none;" rows="3"></textarea>
+                        <span class="input-group-addon btn btn-info" style="background-color: #e27329">Add Note <i class="fa fa-plus-circle" style="padding-left: 12px;"></i></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="timeline">
+                                @forelse($notes as $note)
+                                <li>
+                                    <span style="font-weight: bold;">{{ $note->created_at }}</span>
+                                <span style="float: right; font-style: italic;">{{ $note->user->getDisplayName() }}</span>
+                                <p>{{ $note->note }}</p>
+                                </li>
+                                @empty
+                                    <li>There are no notes yet!</li>
+                                @endforelse
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title in-white">
+                        <i class="glyphicon glyphicon-paperclip"></i> {{ trans('texts.documents') }}
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                
+                            </div>
+                        </div>
+                    </div>
+                    {{-- <div class="row">
+                        <div class="col-md-12" style="padding-top: 12px;"> --}}
+                            {{-- {!! Button::normal(trans('texts.save'))
+                                ->submit()
+                                ->appendIcon(Icon::create('floppy-disk'))
+                            !!} --}}
+                            {{-- <a href="#" class="btn btn-default" data-toggle="modal" data-target="#add_note_modal">Add Note <i class="fa fa-plus-circle" style="padding-left: 12px;"></i></a> --}}
+                        {{-- </div>
+                    </div> --}}
+                </div>
+            </div>  
+        </div>
     </div>
+    @endif
    
     <center class="buttons">
 
@@ -95,8 +160,9 @@
             ->appendIcon(Icon::create('pluscircle'))
         !!} --}}
 
-
-        <a href="#" class="btn btn-info btn-lg" data-toggle="modal" data-target="#add_note_modal">Add Note <i class="fa fa-plus-circle" style="padding-left: 12px;"></i></a>
+        {{-- @if($workorder)
+            <a href="#" class="btn btn-info btn-lg" data-toggle="modal" data-target="#add_note_modal">Add Note <i class="fa fa-plus-circle" style="padding-left: 12px;"></i></a>
+        @endif --}}
 
     </center>
 

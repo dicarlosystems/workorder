@@ -92,7 +92,9 @@ class WorkOrderController extends BaseController
     {
         $workorder = $request->entity();
 
-        $notes = $workorder->has('notes')->get();
+        // $notes = $workorder->notes()->exists() ? $workorder::with('notes.user')->orderBy('notes.get() : [];
+
+        $notes = WorkOrderNote::where('work_order_id', '=', $workorder->id)->orderBy('created_at', 'desc')->get();
 
         $clients = Client::all()->map(function($item) {
             return ['value' => $item->name . ' - ' . $item->id_number, 'key' => $item->id];
