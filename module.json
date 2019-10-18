@@ -13,5 +13,6 @@
         "start.php"
     ],
     "icon": "medkit",
-    "plural": "workorders"
+    "plural": "workorders",
+    "base-route": "workorders"
 }
