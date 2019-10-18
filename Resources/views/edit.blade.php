@@ -122,13 +122,7 @@
                 </h3>
             </div>
             <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="input-group">
-                            
-                        </div>
-                    </div>
-                </div>
+                @include('workorder::partials.intake_form', $intake)
             </div>
         </div>  
     </div>

@@ -3,16 +3,19 @@
 namespace Modules\WorkOrder\Http\Controllers;
 
 use Auth;
-use App\Http\Controllers\BaseController;
+use Utils;
+use ReflectionClass;
+use ReflectionMethod;
 use App\Models\Client;
 use App\Services\DatatableService;
+use App\Http\Controllers\BaseController;
 use Modules\WorkOrder\Models\WorkOrderNote;
+use Modules\Manufacturer\Models\Manufacturer;
 use Modules\WorkOrder\Datatables\WorkOrderDatatable;
-use Modules\WorkOrder\Repositories\WorkOrderRepository;
 use Modules\WorkOrder\Http\Requests\WorkOrderRequest;
+use Modules\WorkOrder\Repositories\WorkOrderRepository;
 use Modules\WorkOrder\Http\Requests\CreateWorkOrderRequest;
 use Modules\WorkOrder\Http\Requests\UpdateWorkOrderRequest;
-use Utils;
 
 class WorkOrderController extends BaseController
 {
@@ -100,6 +103,45 @@ class WorkOrderController extends BaseController
 
         $workorder->work_order_date = Utils::fromSqlDate($workorder->work_order_date);
 
+        $intake_json = [
+            'Power Cord' => 'radio|direct|Y,N',
+            'Powers On?' => 'radio|direct|Y,N',
+            'Manufacturer' => 'select|eloquent|Modules\Manufacturer\Models\Manufacturer|name',
+            'Username' => 'text',
+            'Password' => 'text'
+        ];
+
+        $intake = [];
+
+        foreach($intake_json as $fieldName => $attributeString) {
+            $attributes = explode('|', $attributeString);
+
+            if($attributes[0] == 'text' || $attributes[0] == 'textarea') {
+                $intake[] = [
+                    'label' => $fieldName,
+                    'type' => $attributes[0]
+                ];
+            } elseif($attributes[0] =='radio' || $attributes[0] == 'select') {
+                if($attributes[1] == 'direct') {
+                    $values = explode(',', $attributes[2]);
+                } elseif($attributes[1] == 'eloquent') {
+                    $className = $attributes[2];
+                    
+                    $values = $className::get()->sortBy('name');
+                }
+
+                $intake[] = [
+                    'label' => $fieldName,
+                    'type' => $attributes[0],
+                    'values' => $values
+                ];
+
+            } elseif($attributes[0] == 'checkbox') {
+            }
+        }
+
+        dump($intake);
+      
         $data = [
             'workorder' => $workorder,
             'method' => 'PUT',
@@ -107,6 +149,7 @@ class WorkOrderController extends BaseController
             'title' => mtrans('workorder', 'edit_workorder'),
             'clients' => $clients,
             'notes' => $notes,
+            'intake' => $intake
         ];
 
         return view('workorder::edit', $data);
