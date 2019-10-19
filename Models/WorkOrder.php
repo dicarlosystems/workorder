@@ -3,8 +3,8 @@
 namespace Modules\WorkOrder\Models;
 
 use App\Models\EntityModel;
-use Laracasts\Presenter\PresentableTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laracasts\Presenter\PresentableTrait;
 
 class WorkOrder extends EntityModel
 {
@@ -23,7 +23,8 @@ class WorkOrder extends EntityModel
         'user_id',
         'client_id',
         'synopsis',
-        'problem_description'
+        'problem_description',
+        'intake_data'
     ];
 
     protected $dates = [

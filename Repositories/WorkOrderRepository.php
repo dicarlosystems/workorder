@@ -2,10 +2,10 @@
 
 namespace Modules\WorkOrder\Repositories;
 
-use DB;
 use App\Models\Client;
-use Modules\WorkOrder\Models\WorkOrder;
 use App\Ninja\Repositories\BaseRepository;
+use DB;
+use Modules\WorkOrder\Models\WorkOrder;
 use Utils;
 //use App\Events\WorkorderWasCreated;
 //use App\Events\WorkorderWasUpdated;
@@ -35,6 +35,7 @@ class WorkOrderRepository extends BaseRepository
                         'workorders.work_order_date',
                         'workorders.synopsis',
                         'workorders.problem_description',
+                        'workorders.intake_data',
                         'workorders.public_id',
                         'workorders.deleted_at',
                         'workorders.created_at',

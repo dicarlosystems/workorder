@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 class CreateWorkOrdersTable extends Migration
 {
@@ -17,10 +17,12 @@ class CreateWorkOrdersTable extends Migration
             $table->unsignedInteger('user_id')->index();
             $table->unsignedInteger('account_id')->index();
             $table->unsignedInteger('client_id')->index();
-            $table->date("work_order_date");
+            $table->string('work_order_number');
+            $table->date('work_order_date');
             $table->string('synopsis', 80);
             $table->string('problem_description');
-            $table->string('resolution');
+            $table->string('resolution')->nullable();
+            $table->string('intake_data')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

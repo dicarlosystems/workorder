@@ -2,20 +2,20 @@
 
 namespace Modules\WorkOrder\Http\Controllers;
 
-use Auth;
-use Utils;
-use ReflectionClass;
-use ReflectionMethod;
+use App\Http\Controllers\BaseController;
 use App\Models\Client;
 use App\Services\DatatableService;
-use App\Http\Controllers\BaseController;
-use Modules\WorkOrder\Models\WorkOrderNote;
+use Auth;
 use Modules\Manufacturer\Models\Manufacturer;
 use Modules\WorkOrder\Datatables\WorkOrderDatatable;
-use Modules\WorkOrder\Http\Requests\WorkOrderRequest;
-use Modules\WorkOrder\Repositories\WorkOrderRepository;
 use Modules\WorkOrder\Http\Requests\CreateWorkOrderRequest;
 use Modules\WorkOrder\Http\Requests\UpdateWorkOrderRequest;
+use Modules\WorkOrder\Http\Requests\WorkOrderRequest;
+use Modules\WorkOrder\Models\WorkOrderNote;
+use Modules\WorkOrder\Repositories\WorkOrderRepository;
+use ReflectionClass;
+use ReflectionMethod;
+use Utils;
 
 class WorkOrderController extends BaseController
 {
@@ -81,7 +81,9 @@ class WorkOrderController extends BaseController
      */
     public function store(CreateWorkOrderRequest $request)
     {
-        $workorder = $this->workorderRepo->save($request->input());
+        $data = $request->input();
+
+        $workorder = $this->workorderRepo->save($data);
 
         return redirect()->to($workorder->present()->editUrl)
             ->with('message', mtrans('workorder', 'created_workorder'));
@@ -103,10 +105,26 @@ class WorkOrderController extends BaseController
 
         $workorder->work_order_date = Utils::fromSqlDate($workorder->work_order_date);
 
+        $intake_data = json_decode($workorder->intake_data, true);
+
         $intake_json = [
-            'Power Cord' => 'radio|direct|Y,N',
-            'Powers On?' => 'radio|direct|Y,N',
-            'Manufacturer' => 'select|eloquent|Modules\Manufacturer\Models\Manufacturer|name',
+
+            // radio format:
+            // [0] type == radio
+            // [1] Comma-separated list of values
+            'Power Cord' => 'inline_radio|Yes,No,N/A',
+            'Powers On?' => 'radio|Yes,No,Unknown',
+            'E-Waste after complete?' => 'select|Yes,No,N/A',
+            
+            // simple select format:
+            // [0] type == simpleselect
+            // [1] Entity class
+            // [2] Sort field
+            // [3] itemLabel
+            // [4] fieldLabel
+            // [5] Module name
+            'Manufacturer' => 'simpleselect|Modules\Manufacturer\Models\Manufacturer|name|name|fieldLabel|Manufacturer',
+            'Product' => 'simpleselect|App\Models\Product|product_key|product_key|fieldLabel',
             'Username' => 'text',
             'Password' => 'text'
         ];
@@ -118,30 +136,63 @@ class WorkOrderController extends BaseController
 
             if($attributes[0] == 'text' || $attributes[0] == 'textarea') {
                 $intake[] = [
+                    'type' => $attributes[0],
+                    'name' => 'intake_' . str_replace(' ', '_', $fieldName),
                     'label' => $fieldName,
-                    'type' => $attributes[0]
+                    'value' => $intake_data['intake_' . $fieldName]
                 ];
-            } elseif($attributes[0] =='radio' || $attributes[0] == 'select') {
-                if($attributes[1] == 'direct') {
-                    $values = explode(',', $attributes[2]);
-                } elseif($attributes[1] == 'eloquent') {
-                    $className = $attributes[2];
-                    
-                    $values = $className::get()->sortBy('name');
+            // } elseif($attributes[0] =='radio' || $attributes[0] == 'select') {
+            } elseif($attributes[0] =='simpleselect') {
+                $className = $attributes[1];
+                
+                $values = $className::get()->sortBy($attributes[2]);
+                $entityType = array(new $className, "getEntityType");
+
+                $intake[] = [
+                    'type' => $attributes[0],
+                    'entityType' => $entityType(),
+                    'items' => $values,
+                    'itemLabel' => $attributes[3],
+                    'fieldLabel' => $entityType(),
+                    'module' => array_key_exists(5, $attributes) ? $attributes[5] : null,
+                    'selectId' => 'intake_' . $entityType()
+                ];
+            } elseif($attributes[0] == 'radio' || $attributes[0] == 'inline_radio') {
+                $values = explode(',', $attributes[1]);
+                $radios = [];
+
+                foreach($values as $key => $value) {
+                    $radios[$value] = [
+                        'name' => 'intake_' . str_replace(' ', '_', $fieldName),
+                        'value' => $value
+                    ];
                 }
 
                 $intake[] = [
-                    'label' => $fieldName,
                     'type' => $attributes[0],
-                    'values' => $values
+                    'name' => 'intake_' . str_replace(' ', '_', $fieldName),
+                    'values' => $radios,
+                    'value' => $intake_data['intake_' . str_replace(' ', '_', $fieldName)]
                 ];
+            } elseif($attributes[0] == 'select') {
+                $values = explode(',', $attributes[1]);
+                $options = [];
 
-            } elseif($attributes[0] == 'checkbox') {
+                foreach($values as $key => $value) {
+                    $options[$value] = [
+                        'name' => $fieldName,
+                        'value' => $value
+                    ];
+                }
+
+                $intake[] = [
+                    'type' => $attributes[0],
+                    'name' => 'intake_' . str_replace(' ', '_', $fieldName),
+                    'values' => $options,
+                ];
             }
         }
 
-        dump($intake);
-      
         $data = [
             'workorder' => $workorder,
             'method' => 'PUT',
@@ -187,6 +238,18 @@ class WorkOrderController extends BaseController
      */
     public function update(UpdateWorkOrderRequest $request)
     {
+        $data = $request->input();
+
+        $intake_data = [];
+
+        foreach($data as $field => $value) {
+            if(substr($field, 0, 7) == 'intake_') {
+                $intake_data[$field] = $value;
+            }
+        }
+
+        $request->merge(['intake_data' => json_encode($intake_data)]);
+
         $workorder = $this->workorderRepo->save($request->input(), $request->entity());
 
         return redirect()->to($workorder->present()->editUrl)
@@ -204,5 +267,18 @@ class WorkOrderController extends BaseController
 
         return redirect()->to('workorders')
             ->with('message', mtrans('workorder', $action . '_workorder_complete'));
+    }
+
+    public function saveSettings() {
+
+    }
+
+    public function showSettings()
+    {
+        $account = Auth::user()->account;
+
+        return view('workorder::settings', [
+            'account' => $account
+        ]);
     }
 }
