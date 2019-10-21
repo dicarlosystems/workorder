@@ -26,6 +26,8 @@
                         <div class="col-md-4">
                             @render('App\Http\ViewComponents\SimpleSelectComponent', ['entityType' => ENTITY_CLIENT, 'items' => $clients, 'itemLabel' => 'name', 'fieldLabel' => 'client'])
                             
+                            {!! Former::text('work_order_number')->label(mtrans('workorder', 'work_order_number')) !!}
+
                             {!! Former::text('work_order_date')->label(mtrans('workorder', 'work_order_date'))
                                 ->data_bind("datePicker: work_order_date, valueUpdate: 'afterkeydown'")
                                 ->data_date_format(Session::get(SESSION_DATE_PICKER_FORMAT, DEFAULT_DATE_PICKER_FORMAT))->appendIcon('calendar')->addGroupClass('work_order_date') !!}
@@ -118,7 +120,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title in-white">
-                    <i class="glyphicon glyphicon-paperclip"></i> {{ trans('texts.documents') }}
+                    <i class="glyphicon glyphicon-pencil"></i> {{ mtrans('workorder', 'intake_form') }}
                 </h3>
             </div>
             <div class="panel-body">

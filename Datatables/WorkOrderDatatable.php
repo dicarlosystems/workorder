@@ -16,9 +16,9 @@ class WorkOrderDatatable extends EntityDatatable
     {
         return [
             [
-                'id',
+                'work_order_number',
                 function ($model) {
-                    return link_to("workorders/{$model->work_order_number}", $model->work_order_number)->toHtml();
+                    return link_to("workorders/{$model->id}", $model->work_order_number)->toHtml();
                 }
             ],
             [

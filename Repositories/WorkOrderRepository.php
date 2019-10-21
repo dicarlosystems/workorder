@@ -2,16 +2,26 @@
 
 namespace Modules\WorkOrder\Repositories;
 
-use App\Models\Client;
-use App\Ninja\Repositories\BaseRepository;
 use DB;
-use Modules\WorkOrder\Models\WorkOrder;
 use Utils;
+use App\Models\Client;
+use Modules\WorkOrder\Models\WorkOrder;
+use App\Ninja\Repositories\BaseRepository;
+use Modules\WorkOrder\Services\WorkOrderService;
 //use App\Events\WorkorderWasCreated;
 //use App\Events\WorkorderWasUpdated;
 
 class WorkOrderRepository extends BaseRepository
 {
+    protected $workorderService;
+
+    public function __construct(WorkOrderService $workorderService)
+    {
+        //parent::__construct();
+
+        $this->workorderService = $workorderService;
+    }
+
     public function getClassName()
     {
         return 'Modules\Workorder\Models\WorkOrder';
@@ -30,7 +40,8 @@ class WorkOrderRepository extends BaseRepository
                     ->join('clients', 'workorders.client_id', '=', 'clients.id')
                     ->where('workorders.account_id', '=', \Auth::user()->account_id)
                     ->select(
-                        'workorders.id as work_order_number',
+                        'workorders.id',
+                        'workorders.work_order_number',
                         'workorders.client_id',
                         'workorders.work_order_date',
                         'workorders.synopsis',
@@ -68,6 +79,8 @@ class WorkOrderRepository extends BaseRepository
 
         $entity->fill($data);
         $entity->work_order_date = Utils::toSqlDate($data['work_order_date']);
+        
+        $entity->work_order_number = $this->workorderService->getNextNumber($entity);
 
         $entity->save();
 
@@ -81,5 +94,4 @@ class WorkOrderRepository extends BaseRepository
 
         return $entity;
     }
-
 }

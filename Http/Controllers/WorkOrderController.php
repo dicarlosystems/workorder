@@ -2,31 +2,31 @@
 
 namespace Modules\WorkOrder\Http\Controllers;
 
-use App\Http\Controllers\BaseController;
+use Auth;
+use Utils;
 use App\Models\Client;
 use App\Services\DatatableService;
-use Auth;
-use Modules\Manufacturer\Models\Manufacturer;
+use App\Http\Controllers\BaseController;
+use Modules\WorkOrder\Models\WorkOrderNote;
+use Modules\WorkOrder\Services\WorkOrderService;
 use Modules\WorkOrder\Datatables\WorkOrderDatatable;
+use Modules\WorkOrder\Http\Requests\WorkOrderRequest;
+use Modules\WorkOrder\Repositories\WorkOrderRepository;
 use Modules\WorkOrder\Http\Requests\CreateWorkOrderRequest;
 use Modules\WorkOrder\Http\Requests\UpdateWorkOrderRequest;
-use Modules\WorkOrder\Http\Requests\WorkOrderRequest;
-use Modules\WorkOrder\Models\WorkOrderNote;
-use Modules\WorkOrder\Repositories\WorkOrderRepository;
-use ReflectionClass;
-use ReflectionMethod;
-use Utils;
 
 class WorkOrderController extends BaseController
 {
-    protected $WorkOrderRepo;
+    protected $workorderRepo;
+    protected $workorderService;
     //protected $entityType = 'workorder';
 
-    public function __construct(WorkOrderRepository $workorderRepo)
+    public function __construct(WorkOrderRepository $workorderRepo, WorkOrderService $workorderService)
     {
         //parent::__construct();
 
         $this->workorderRepo = $workorderRepo;
+        $this->workorderService = $workorderService;
     }
 
     /**
@@ -105,77 +105,56 @@ class WorkOrderController extends BaseController
 
         $workorder->work_order_date = Utils::fromSqlDate($workorder->work_order_date);
 
-        $intake_data = json_decode($workorder->intake_data, true);
+        $intake_data = $workorder->intake_data;
+        $intake_form = $this->workorderService->getIntakeForm($workorder);
+    
+        // intake data format:
+        // [key] form field name
+        // [0] type == radio || inline_radio || select || text || textarea
+        // [1] label
+        // [2] Comma-separated list of values (* only for types: radio, inline_radio, and select)
 
-        $intake_json = [
-
-            // radio format:
-            // [0] type == radio
-            // [1] Comma-separated list of values
-            'Power Cord' => 'inline_radio|Yes,No,N/A',
-            'Powers On?' => 'radio|Yes,No,Unknown',
-            'E-Waste after complete?' => 'select|Yes,No,N/A',
-            
-            // simple select format:
-            // [0] type == simpleselect
-            // [1] Entity class
-            // [2] Sort field
-            // [3] itemLabel
-            // [4] fieldLabel
-            // [5] Module name
-            'Manufacturer' => 'simpleselect|Modules\Manufacturer\Models\Manufacturer|name|name|fieldLabel|Manufacturer',
-            'Product' => 'simpleselect|App\Models\Product|product_key|product_key|fieldLabel',
-            'Username' => 'text',
-            'Password' => 'text'
-        ];
+        // $intake_json = [
+        //     'power_cord' => 'inline_radio|Power Cord|Yes,No,N/A',
+        //     'powers_on' => 'radio|Powers On?|Yes,No,Unknown',
+        //     'ewaste_after' => 'select|E-Waste after complete?|Yes,No,N/A',
+        //     'manufacturer' => 'text|Manufacturer',
+        //     'username' => 'text|Username',
+        //     'password' => 'text|Password'
+        // ];
 
         $intake = [];
 
-        foreach($intake_json as $fieldName => $attributeString) {
+        foreach($intake_form as $fieldName => $attributeString) {
             $attributes = explode('|', $attributeString);
 
             if($attributes[0] == 'text' || $attributes[0] == 'textarea') {
                 $intake[] = [
                     'type' => $attributes[0],
                     'name' => 'intake_' . str_replace(' ', '_', $fieldName),
-                    'label' => $fieldName,
-                    'value' => $intake_data['intake_' . $fieldName]
-                ];
-            // } elseif($attributes[0] =='radio' || $attributes[0] == 'select') {
-            } elseif($attributes[0] =='simpleselect') {
-                $className = $attributes[1];
-                
-                $values = $className::get()->sortBy($attributes[2]);
-                $entityType = array(new $className, "getEntityType");
-
-                $intake[] = [
-                    'type' => $attributes[0],
-                    'entityType' => $entityType(),
-                    'items' => $values,
-                    'itemLabel' => $attributes[3],
-                    'fieldLabel' => $entityType(),
-                    'module' => array_key_exists(5, $attributes) ? $attributes[5] : null,
-                    'selectId' => 'intake_' . $entityType()
+                    'label' => $attributes[1],
+                    'value' => array_key_exists($fieldName, $intake_data) ? $intake_data[$fieldName] : ''
                 ];
             } elseif($attributes[0] == 'radio' || $attributes[0] == 'inline_radio') {
-                $values = explode(',', $attributes[1]);
+                $values = explode(',', $attributes[2]);
                 $radios = [];
 
                 foreach($values as $key => $value) {
                     $radios[$value] = [
                         'name' => 'intake_' . str_replace(' ', '_', $fieldName),
-                        'value' => $value
+                        'value' => $value,
+                        'checked' => $intake_data[$fieldName] == $value ? true : false
                     ];
                 }
 
                 $intake[] = [
                     'type' => $attributes[0],
                     'name' => 'intake_' . str_replace(' ', '_', $fieldName),
-                    'values' => $radios,
-                    'value' => $intake_data['intake_' . str_replace(' ', '_', $fieldName)]
+                    'label' => $attributes[1],
+                    'values' => $radios
                 ];
             } elseif($attributes[0] == 'select') {
-                $values = explode(',', $attributes[1]);
+                $values = explode(',', $attributes[2]);
                 $options = [];
 
                 foreach($values as $key => $value) {
@@ -188,7 +167,9 @@ class WorkOrderController extends BaseController
                 $intake[] = [
                     'type' => $attributes[0],
                     'name' => 'intake_' . str_replace(' ', '_', $fieldName),
+                    'label' => $attributes[1],
                     'values' => $options,
+                    'value' => array_key_exists($fieldName, $intake_data) ? $intake_data[$fieldName] : ''
                 ];
             }
         }
@@ -200,7 +181,8 @@ class WorkOrderController extends BaseController
             'title' => mtrans('workorder', 'edit_workorder'),
             'clients' => $clients,
             'notes' => $notes,
-            'intake' => $intake
+            'intake' => $intake,
+            'intake_form' => $intake_form
         ];
 
         return view('workorder::edit', $data);
