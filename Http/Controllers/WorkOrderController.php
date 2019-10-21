@@ -2,18 +2,18 @@
 
 namespace Modules\WorkOrder\Http\Controllers;
 
-use Auth;
-use Utils;
+use App\Http\Controllers\BaseController;
 use App\Models\Client;
 use App\Services\DatatableService;
-use App\Http\Controllers\BaseController;
-use Modules\WorkOrder\Models\WorkOrderNote;
-use Modules\WorkOrder\Services\WorkOrderService;
+use Auth;
 use Modules\WorkOrder\Datatables\WorkOrderDatatable;
-use Modules\WorkOrder\Http\Requests\WorkOrderRequest;
-use Modules\WorkOrder\Repositories\WorkOrderRepository;
 use Modules\WorkOrder\Http\Requests\CreateWorkOrderRequest;
 use Modules\WorkOrder\Http\Requests\UpdateWorkOrderRequest;
+use Modules\WorkOrder\Http\Requests\WorkOrderRequest;
+use Modules\WorkOrder\Models\WorkOrderNote;
+use Modules\WorkOrder\Repositories\WorkOrderRepository;
+use Modules\WorkOrder\Services\WorkOrderService;
+use Utils;
 
 class WorkOrderController extends BaseController
 {
@@ -114,7 +114,7 @@ class WorkOrderController extends BaseController
         // [1] label
         // [2] Comma-separated list of values (* only for types: radio, inline_radio, and select)
 
-        // $intake_json = [
+        // $intake_form = [
         //     'power_cord' => 'inline_radio|Power Cord|Yes,No,N/A',
         //     'powers_on' => 'radio|Powers On?|Yes,No,Unknown',
         //     'ewaste_after' => 'select|E-Waste after complete?|Yes,No,N/A',
@@ -125,52 +125,54 @@ class WorkOrderController extends BaseController
 
         $intake = [];
 
-        foreach($intake_form as $fieldName => $attributeString) {
-            $attributes = explode('|', $attributeString);
+        if($intake_form) {
+            foreach($intake_form as $fieldName => $attributeString) {
+                $attributes = explode('|', $attributeString);
 
-            if($attributes[0] == 'text' || $attributes[0] == 'textarea') {
-                $intake[] = [
-                    'type' => $attributes[0],
-                    'name' => 'intake_' . str_replace(' ', '_', $fieldName),
-                    'label' => $attributes[1],
-                    'value' => array_key_exists($fieldName, $intake_data) ? $intake_data[$fieldName] : ''
-                ];
-            } elseif($attributes[0] == 'radio' || $attributes[0] == 'inline_radio') {
-                $values = explode(',', $attributes[2]);
-                $radios = [];
-
-                foreach($values as $key => $value) {
-                    $radios[$value] = [
+                if($attributes[0] == 'text' || $attributes[0] == 'textarea') {
+                    $intake[] = [
+                        'type' => $attributes[0],
                         'name' => 'intake_' . str_replace(' ', '_', $fieldName),
-                        'value' => $value,
-                        'checked' => $intake_data[$fieldName] == $value ? true : false
+                        'label' => $attributes[1],
+                        'value' => $intake_data ? (array_key_exists($fieldName, $intake_data) ? $intake_data[$fieldName] : '') : ''
+                    ];
+                } elseif($attributes[0] == 'radio' || $attributes[0] == 'inline_radio') {
+                    $values = explode(',', $attributes[2]);
+                    $radios = [];
+
+                    foreach($values as $key => $value) {
+                        $radios[$value] = [
+                            'name' => 'intake_' . str_replace(' ', '_', $fieldName),
+                            'value' => $value,
+                            'checked' => $intake_data ? ($intake_data[$fieldName] == $value ? true : false) : false
+                        ];
+                    }
+
+                    $intake[] = [
+                        'type' => $attributes[0],
+                        'name' => 'intake_' . str_replace(' ', '_', $fieldName),
+                        'label' => $attributes[1],
+                        'values' => $radios
+                    ];
+                } elseif($attributes[0] == 'select') {
+                    $values = explode(',', $attributes[2]);
+                    $options = [];
+
+                    foreach($values as $key => $value) {
+                        $options[$value] = [
+                            'name' => $fieldName,
+                            'value' => $value
+                        ];
+                    }
+
+                    $intake[] = [
+                        'type' => $attributes[0],
+                        'name' => 'intake_' . str_replace(' ', '_', $fieldName),
+                        'label' => $attributes[1],
+                        'values' => $options,
+                        'value' => $intake_data ? (array_key_exists($fieldName, $intake_data) ? $intake_data[$fieldName] : '') : null
                     ];
                 }
-
-                $intake[] = [
-                    'type' => $attributes[0],
-                    'name' => 'intake_' . str_replace(' ', '_', $fieldName),
-                    'label' => $attributes[1],
-                    'values' => $radios
-                ];
-            } elseif($attributes[0] == 'select') {
-                $values = explode(',', $attributes[2]);
-                $options = [];
-
-                foreach($values as $key => $value) {
-                    $options[$value] = [
-                        'name' => $fieldName,
-                        'value' => $value
-                    ];
-                }
-
-                $intake[] = [
-                    'type' => $attributes[0],
-                    'name' => 'intake_' . str_replace(' ', '_', $fieldName),
-                    'label' => $attributes[1],
-                    'values' => $options,
-                    'value' => array_key_exists($fieldName, $intake_data) ? $intake_data[$fieldName] : ''
-                ];
             }
         }
 
@@ -182,7 +184,7 @@ class WorkOrderController extends BaseController
             'clients' => $clients,
             'notes' => $notes,
             'intake' => $intake,
-            'intake_form' => $intake_form
+            'intake_form' => json_encode($intake_form, false)
         ];
 
         return view('workorder::edit', $data);

@@ -26,7 +26,9 @@
                         <div class="col-md-4">
                             @render('App\Http\ViewComponents\SimpleSelectComponent', ['entityType' => ENTITY_CLIENT, 'items' => $clients, 'itemLabel' => 'name', 'fieldLabel' => 'client'])
                             
-                            {!! Former::text('work_order_number')->label(mtrans('workorder', 'work_order_number')) !!}
+                            @if($workorder)
+                                {!! Former::text('work_order_number')->label(mtrans('workorder', 'work_order_number')) !!}
+                            @endif
 
                             {!! Former::text('work_order_date')->label(mtrans('workorder', 'work_order_date'))
                                 ->data_bind("datePicker: work_order_date, valueUpdate: 'afterkeydown'")
@@ -44,10 +46,6 @@
     </div>
 
 @if($workorder)
-<div class="row">
-    <div class="col-md-6" id="notes_container">
-        {{-- @include('workorder::partials.notes', ['notes' => $notes]); --}}
-        {{-- @push('module_css') --}}
 <style type="text/css">
     ul.timeline {
         list-style-type: none;
@@ -83,50 +81,53 @@
         z-index: 400;
     }
 </style>
-{{-- @endpush --}}
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title in-white">
-            <i class="glyphicon glyphicon-pushpin"></i> {{ mtrans('workorder', 'notes') }}
-        </h3>
-    </div>
-    <div class="panel-body">
-        <div class="input-group">
-            <textarea class="form-control" name="add_note" style="resize:none;" rows="3"></textarea>
-            <span id="addWorkOrderNote" class="input-group-addon btn btn-info" style="background-color: #e27329">Add Note <i
-                    class="fa fa-plus-circle" style="padding-left: 12px;"></i></span>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <ul class="timeline">
-                    @forelse($notes as $note)
-                    <li>
-                        @include('workorder::partials.note')
-                        {{-- <span style="font-weight: bold;">{{ $note->created_at }}</span>
-                        <span style="float: right; font-style: italic;">{{ $note->user->getDisplayName() }}</span>
-                        <p>{{ $note->note }}</p> --}}
-                    </li>
-                    @empty
-                    <li class="timeline-empty">There are no notes yet!</li>
-                    @endforelse
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-    </div>
-    <div class="col-md-6">
+<div class="row">
+    <div class="col-md-6" id="notes_container">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title in-white">
-                    <i class="glyphicon glyphicon-pencil"></i> {{ mtrans('workorder', 'intake_form') }}
+                    <i class="glyphicon glyphicon-pushpin"></i> {{ mtrans('workorder', 'notes') }}
                 </h3>
             </div>
             <div class="panel-body">
-                @include('workorder::partials.intake_form', $intake)
+                <div class="input-group">
+                    <textarea class="form-control" name="add_note" style="resize:none;" rows="3"></textarea>
+                    <span id="addWorkOrderNote" class="input-group-addon btn btn-info disabled" style="background-color: #e27329">Add Note <i
+                            class="fa fa-plus-circle" style="padding-left: 12px;"></i></span>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="timeline">
+                            @forelse($notes as $note)
+                            <li>
+                                @include('workorder::partials.note')
+                                {{-- <span style="font-weight: bold;">{{ $note->created_at }}</span>
+                                <span style="float: right; font-style: italic;">{{ $note->user->getDisplayName() }}</span>
+                                <p>{{ $note->note }}</p> --}}
+                            </li>
+                            @empty
+                            <li class="timeline-empty">There are no notes yet!</li>
+                            @endforelse
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </div>  
+        </div>
+    </div>
+    <div class="col-md-6">
+        @if($intake || $intake_form)
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title in-white">
+                        <i class="glyphicon glyphicon-pencil"></i> {{ mtrans('workorder', 'intake_form') }}
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    @include('workorder::partials.intake_form', $intake)
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 @endif
@@ -156,9 +157,19 @@
         $('#work_order_date').datepicker('show');
     });
 
-    {{-- @push('module_scripts') --}}
+    $('[name="add_note"]').on('keyup', function() {
+        console.log(this);
+        if($(this).val() == "") {
+            $('#addWorkOrderNote').addClass('disabled');
+        } else {
+            $('#addWorkOrderNote').removeClass('disabled');
+        }
+    });
+
     $('#addWorkOrderNote').on('click', function () {
-        addNote();
+        if($('[name="add_note"]').val() !== "") {
+            addNote();
+        }
     });
   
     function addNote() {
@@ -185,6 +196,7 @@
                 $('.timeline').prepend('<li>' + data.html + '</li>');
                                 
                 $('[name="add_note"]').val('');
+                $('#addWorkOrderNote').addClass('disabled');
             },
             type: 'POST'
         });

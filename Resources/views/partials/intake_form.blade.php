@@ -33,6 +33,6 @@
     @endif
 @endforeach
 
-{!! Former::hidden('intake_form')->value($intake) !!}
+{!! Former::hidden('intake_form')->value($intake_form) !!}
         
         

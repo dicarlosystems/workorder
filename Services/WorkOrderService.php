@@ -50,10 +50,15 @@ class WorkOrderService extends BaseService
     public function getIntakeForm(WorkOrder $workOrder)
     {
         if($workOrder->intake_form) {
-            return $workOrder->intake_form;
+            return json_decode($workOrder->intake_form, true);
         } else {
-            $settings = WorkOrderSettings::where('account_id', '=', $account->id)->first();
-            return $settings->intake_form;
+            $settings = WorkOrderSettings::where('account_id', '=', $workOrder->account->id)->first();
+            
+            if($settings) {
+                return json_decode($settings->intake_form, true);
+            }
         }
+
+        return '';
     }
 }

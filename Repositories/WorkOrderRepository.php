@@ -2,12 +2,12 @@
 
 namespace Modules\WorkOrder\Repositories;
 
-use DB;
-use Utils;
 use App\Models\Client;
-use Modules\WorkOrder\Models\WorkOrder;
 use App\Ninja\Repositories\BaseRepository;
+use DB;
+use Modules\WorkOrder\Models\WorkOrder;
 use Modules\WorkOrder\Services\WorkOrderService;
+use Utils;
 //use App\Events\WorkorderWasCreated;
 //use App\Events\WorkorderWasUpdated;
 
@@ -83,6 +83,11 @@ class WorkOrderRepository extends BaseRepository
         $entity->work_order_number = $this->workorderService->getNextNumber($entity);
 
         $entity->save();
+
+        if(! $entity->work_order_number) {
+            $entity->work_order_number = str_pad($entity->id, $entity->account->invoice_number_padding, '0', STR_PAD_LEFT);
+            $entity->save();
+        }
 
         /*
         if (!$publicId || intval($publicId) < 0) {
