@@ -8,6 +8,7 @@ use App\Services\DatatableService;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Session;
 use Modules\WorkOrder\Datatables\WorkOrderDatatable;
 use Modules\WorkOrder\Http\Requests\CreateWorkOrderRequest;
 use Modules\WorkOrder\Http\Requests\UpdateWorkOrderRequest;
@@ -205,9 +206,7 @@ class WorkOrderController extends BaseController
 
         $html = view('workorder::partials.note', ['note' => $note])->render();
 
-        // return redirect()->to("workorders/{$request->workorder}/edit");
-        // return response()->json(['html' => $html]);
-        return response()->json(['html' => $html]);
+        return response()->json(['html' => $html, 'message' => mtrans('workorder', 'added_note')]);
     }
 
     /**

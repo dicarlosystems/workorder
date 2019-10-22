@@ -91,6 +91,7 @@
                     </h3>
                 </div>
                 <div class="panel-body">
+                    
                     <div class="input-group">
                         <textarea class="form-control" name="add_note" style="resize:none;" rows="3"></textarea>
                         <span id="addWorkOrderNote" class="input-group-addon btn btn-info disabled" style="background-color: #e27329">Add Note <i
@@ -158,7 +159,6 @@
     });
 
     $('[name="add_note"]').on('keyup', function() {
-        console.log(this);
         if($(this).val() == "") {
             $('#addWorkOrderNote').addClass('disabled');
         } else {
@@ -174,7 +174,6 @@
   
     function addNote() {
         var note = $('[name="add_note"]').val();
-        console.log(note);
         
         $.ajaxSetup({
             headers: {
@@ -197,6 +196,13 @@
                                 
                 $('[name="add_note"]').val('');
                 $('#addWorkOrderNote').addClass('disabled');
+
+                let elem = '<div class="alert alert-info alert-hide note-alert-info" style="z-index:9999;display:none;">' + data.message + '</div>';
+
+                $('#page-content-wrapper > .container-fluid').prepend(elem);
+                
+                $('.note-alert-info').show();
+                $('.note-alert-info').fadeTo(5000, 5000).fadeOut();
             },
             type: 'POST'
         });

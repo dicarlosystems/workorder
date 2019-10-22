@@ -19,6 +19,7 @@ $LANG = array(
     'note' => 'Note',
     'empty_notes_table' => 'There are no notes attached to this work order.',
     'add_note' => 'Add Note',
+    'added_note' => 'Successfully added note to work order',
     'work_order_number' => 'Work Order Number',
     'intake_form' => 'Intake Form',
     'work_order_number_help' => 'Specify a prefix or use a custom pattern to dynamically set the work order number.',
