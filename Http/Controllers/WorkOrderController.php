@@ -228,7 +228,6 @@ class WorkOrderController extends BaseController
     {
         $data = $request->input();
 
-        dump($data);
         $intake_data = [];
 
         foreach($data as $field => $value) {
