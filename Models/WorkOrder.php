@@ -94,6 +94,7 @@ class WorkOrder extends EntityModel
         return null;
     }
 
+
     // public function getIntakeDataAttribute($value) {
     //     $fields = json_decode($value, true);
         

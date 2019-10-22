@@ -126,6 +126,8 @@ class WorkOrderController extends BaseController
         //     'password' => 'text|Password'
         // ];
 
+        // dump(json_encode($intake_form, true));
+
         $intake = [];
 
         if($intake_form) {
@@ -147,7 +149,7 @@ class WorkOrderController extends BaseController
                         $radios[$value] = [
                             'name' => 'intake_' . str_replace(' ', '_', $fieldName),
                             'value' => $value,
-                            'checked' => $intake_data ? ($intake_data[$fieldName] == $value ? true : false) : false
+                            'checked' => $intake_data && array_key_exists($fieldName, $intake_data) ? ($intake_data[$fieldName] == $value ? true : false) : false
                         ];
                     }
 
@@ -187,7 +189,6 @@ class WorkOrderController extends BaseController
             'clients' => $clients,
             'notes' => $notes,
             'intake' => $intake,
-            'intake_form' => json_encode($intake_form, false)
         ];
 
         return view('workorder::edit', $data);
@@ -227,6 +228,7 @@ class WorkOrderController extends BaseController
     {
         $data = $request->input();
 
+        dump($data);
         $intake_data = [];
 
         foreach($data as $field => $value) {
@@ -270,6 +272,8 @@ class WorkOrderController extends BaseController
             $settings->work_order_number_prefix = null;
             $settings->work_order_number_pattern = trim($request->input('work_order_number_pattern'));
         }
+
+        $settings->intake_form = trim($request->input('intake_form'));
 
         $settings->save();
 

@@ -11,6 +11,7 @@
 {!! Former::populateField('work_order_number_counter', $settings->work_order_number_counter) !!}
 {!! Former::populateField('work_order_number_prefix', $settings->work_order_number_prefix) !!}
 {!! Former::populateField('work_order_number_pattern', $settings->work_order_number_pattern) !!}
+{!! Former::populateField('intake_form', $settings->intake_form) !!}
 
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -48,14 +49,34 @@
     </div>
     <div class="panel-body">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <p>{{  mtrans('workorder', 'intake_form_help_1') }}</p>
+                <p>{{  mtrans('workorder', 'intake_form_help_2') }}</p>
+                <ul>
+                    <li>{{  mtrans('workorder', 'intake_form_help_3') }}</li>
+                    <li>{{  mtrans('workorder', 'intake_form_help_4') }}</li>
+                    <li>{{  mtrans('workorder', 'intake_form_help_5') }}</li>
+                </ul>
+            </div>
+            <div class="col-md-8">
+        <h3>{{ mtrans('workorder', 'intake_form_help_6') }}</h3>
+<pre>
+{ 
+    "power_cord":   "inline_radio|Power Cord|Yes,No,N\/A",
+    "powers_on":    "radio|Powers On?|Yes,No,Unknown",
+    "ewaste_after": "select|E-Waste after complete?|Yes,No,N\/A",
+    "manufacturer": "text|Manufacturer",
+    "username":     "text|Username",
+    "password":     "text|Password"
+}</pre>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
                 {!! Former::textarea('intake_form')
                     ->label(mtrans('workorder','intake_form'))
                     ->rows(8)
                     ->raw() !!}
-            </div>
-            <div class="col-md-6">
-                <p>TODO!!! Help content goes here</p>
             </div>
         </div>
     </div>

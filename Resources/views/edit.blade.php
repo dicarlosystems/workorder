@@ -46,90 +46,90 @@
     </div>
 
 @if($workorder)
-<style type="text/css">
-    ul.timeline {
-        list-style-type: none;
-        position: relative;
-    }
+    <style type="text/css">
+        ul.timeline {
+            list-style-type: none;
+            position: relative;
+        }
 
-    ul.timeline:before {
-        content: ' ';
-        background: #d4d9df;
-        display: inline-block;
-        position: absolute;
-        left: 29px;
-        width: 2px;
-        height: 100%;
-        z-index: 400;
-    }
+        ul.timeline:before {
+            content: ' ';
+            background: #d4d9df;
+            display: inline-block;
+            position: absolute;
+            left: 29px;
+            width: 2px;
+            height: 100%;
+            z-index: 400;
+        }
 
-    ul.timeline > li {
-        margin: 20px 0;
-        padding-left: 20px;
-    }
+        ul.timeline > li {
+            margin: 20px 0;
+            padding-left: 20px;
+        }
 
-    ul.timeline > li:before {
-        content: ' ';
-        background: white;
-        display: inline-block;
-        position: absolute;
-        border-radius: 50%;
-        border: 3px solid #22c0e8;
-        left: 20px;
-        width: 20px;
-        height: 20px;
-        z-index: 400;
-    }
-</style>
+        ul.timeline > li:before {
+            content: ' ';
+            background: white;
+            display: inline-block;
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid #22c0e8;
+            left: 20px;
+            width: 20px;
+            height: 20px;
+            z-index: 400;
+        }
+    </style>
 
-<div class="row">
-    <div class="col-md-6" id="notes_container">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title in-white">
-                    <i class="glyphicon glyphicon-pushpin"></i> {{ mtrans('workorder', 'notes') }}
-                </h3>
-            </div>
-            <div class="panel-body">
-                <div class="input-group">
-                    <textarea class="form-control" name="add_note" style="resize:none;" rows="3"></textarea>
-                    <span id="addWorkOrderNote" class="input-group-addon btn btn-info disabled" style="background-color: #e27329">Add Note <i
-                            class="fa fa-plus-circle" style="padding-left: 12px;"></i></span>
+    <div class="row">
+        <div class="col-md-6" id="notes_container">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title in-white">
+                        <i class="glyphicon glyphicon-pushpin"></i> {{ mtrans('workorder', 'notes') }}
+                    </h3>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <ul class="timeline">
-                            @forelse($notes as $note)
-                            <li>
-                                @include('workorder::partials.note')
-                                {{-- <span style="font-weight: bold;">{{ $note->created_at }}</span>
-                                <span style="float: right; font-style: italic;">{{ $note->user->getDisplayName() }}</span>
-                                <p>{{ $note->note }}</p> --}}
-                            </li>
-                            @empty
-                            <li class="timeline-empty">There are no notes yet!</li>
-                            @endforelse
-                        </ul>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <textarea class="form-control" name="add_note" style="resize:none;" rows="3"></textarea>
+                        <span id="addWorkOrderNote" class="input-group-addon btn btn-info disabled" style="background-color: #e27329">Add Note <i
+                                class="fa fa-plus-circle" style="padding-left: 12px;"></i></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="timeline">
+                                @forelse($notes as $note)
+                                <li>
+                                    @include('workorder::partials.note')
+                                    {{-- <span style="font-weight: bold;">{{ $note->created_at }}</span>
+                                    <span style="float: right; font-style: italic;">{{ $note->user->getDisplayName() }}</span>
+                                    <p>{{ $note->note }}</p> --}}
+                                </li>
+                                @empty
+                                <li class="timeline-empty">There are no notes yet!</li>
+                                @endforelse
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        @if($intake || $intake_form)
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title in-white">
-                        <i class="glyphicon glyphicon-pencil"></i> {{ mtrans('workorder', 'intake_form') }}
-                    </h3>
+        <div class="col-md-6">
+            @if($intake)
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title in-white">
+                            <i class="glyphicon glyphicon-pencil"></i> {{ mtrans('workorder', 'intake_form') }}
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        @include('workorder::partials.intake_form', $intake)
+                    </div>
                 </div>
-                <div class="panel-body">
-                    @include('workorder::partials.intake_form', $intake)
-                </div>
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
-</div>
 @endif
    
     <center class="buttons">

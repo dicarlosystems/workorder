@@ -81,13 +81,14 @@ class WorkOrderRepository extends BaseRepository
         $entity->work_order_date = Utils::toSqlDate($data['work_order_date']);
         
         $entity->work_order_number = $this->workorderService->getNextNumber($entity);
+        $entity->intake_form = $this->workorderService->getIntakeForm($entity);
 
         $entity->save();
 
-        if(! $entity->work_order_number) {
-            $entity->work_order_number = str_pad($entity->id, $entity->account->invoice_number_padding, '0', STR_PAD_LEFT);
-            $entity->save();
-        }
+        // if(! $entity->work_order_number) {
+        //     $entity->work_order_number = str_pad($entity->id, $entity->account->invoice_number_padding, '0', STR_PAD_LEFT);
+        //     $entity->save();
+        // }
 
         /*
         if (!$publicId || intval($publicId) < 0) {

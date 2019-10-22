@@ -23,6 +23,12 @@ $LANG = array(
     'intake_form' => 'Intake Form',
     'work_order_number_help' => 'Specify a prefix or use a custom pattern to dynamically set the work order number.',
     'next_work_order_number' => 'The next work order number is :number.',
+    'intake_form_help_1' => 'A JSON array that defines an intake form for entry on work orders.',
+    'intake_form_help_2' => 'Use the following format for the array:',
+    'intake_form_help_3' => 'type: radio, inline_radio, select, text, or textarea',
+    'intake_form_help_4' => 'label: field label',
+    'intake_form_help_5' => 'Comma-separated list of values (* only for types: radio, inline_radio, and select)',
+    'intake_form_help_6' => 'Example:',
 );
 
 return $LANG;

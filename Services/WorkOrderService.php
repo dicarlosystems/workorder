@@ -3,6 +3,7 @@
 namespace Modules\WorkOrder\Services;
 
 use App\Models\Account;
+use App\Models\Client;
 use App\Services\BaseService;
 use Carbon\Carbon;
 use Modules\WorkOrder\Models\WorkOrder;
@@ -10,6 +11,7 @@ use Modules\WorkOrder\Models\WorkOrderSettings;
 
 class WorkOrderService extends BaseService
 {
+    //same as method on GeneratesNumbers trait with slight tweaks
     public function getNextNumber(WorkOrder $entity)
     {
         $account = $entity->account;
@@ -23,7 +25,11 @@ class WorkOrderService extends BaseService
             $lastNumber = false;
 
             do {
-                $number = $prefix . str_pad($counter, $account->invoice_number_padding, '0', STR_PAD_LEFT);
+                if ($settings->work_order_number_pattern) {
+                    $number = $this->applyNumberPattern($entity, $counter);
+                } else {
+                    $number = $prefix . str_pad($counter, $account->invoice_number_padding, '0', STR_PAD_LEFT);
+                }
 
                 $numberExists = WorkOrder::scope(false, $account->id)->whereWorkOrderNumber($number)->withTrashed()->first();
 
@@ -49,6 +55,8 @@ class WorkOrderService extends BaseService
         return $number;
     }
 
+
+    //same as method on GeneratesNumbers trait with slight tweaks
     /**
      * @param $entity
      * @param mixed $counter
@@ -57,7 +65,9 @@ class WorkOrderService extends BaseService
      */
     public function applyNumberPattern(WorkOrder $workorder, $counter = 0)
     {
-        $settings = $this->getSettings($workorder->account);
+        $account = $workorder->account;
+        $settings = $this->getSettings($account);
+        
         $counter = $counter ?: $settings->work_order_number_counter;
         $pattern = $settings->work_order_number_pattern;
 
@@ -69,7 +79,7 @@ class WorkOrderService extends BaseService
         $replace = [date('Y')];
 
         $search[] = '{$counter}';
-        $replace[] = str_pad($counter, $this->invoice_number_padding, '0', STR_PAD_LEFT);
+        $replace[] = str_pad($counter, $account->invoice_number_padding, '0', STR_PAD_LEFT);
 
         if (strstr($pattern, '{$userId}')) {
             $userId = $workorder->user ? $workorder->user->public_id : (Auth::check() ? Auth::user()->public_id : 0);
@@ -93,7 +103,8 @@ class WorkOrderService extends BaseService
         return $pattern;
     }
 
-        /**
+    //same as method on GeneratesNumbers trait with slight tweaks
+    /**
      * @param $pattern
      * @param $invoice
      *
@@ -101,7 +112,7 @@ class WorkOrderService extends BaseService
      */
     private function getClientWorkOrderNumber($pattern, $workorder)
     {
-        if (! $workorder>client_id) {
+        if (! $workorder->client_id) {
             return $pattern;
         }
 
@@ -132,7 +143,7 @@ class WorkOrderService extends BaseService
     public function getIntakeForm(WorkOrder $workOrder)
     {
         if($workOrder->intake_form) {
-            return json_decode($workOrder->intake_form, true);
+            return $workOrder->intake_form;
         } else {
             $settings = $this->getSettings($workOrder->account);
                         
@@ -161,6 +172,8 @@ class WorkOrderService extends BaseService
 
     public function previewNextNumber() {
         $workorder = WorkOrder::createNew();
+        $client = Client::scope()->first();
+        $workorder->client()->associate($client);
 
         return $this->getNextNumber($workorder);
     }

@@ -22,7 +22,8 @@ class CreateWorkOrdersTable extends Migration
             $table->string('synopsis', 80);
             $table->string('problem_description');
             $table->string('resolution')->nullable();
-            $table->string('intake_data')->nullable();
+            $table->mediumText('intake_data')->nullable();
+            $table->mediumText('intake_form')->nullable();
 
             $table->timestamps();
             $table->softDeletes();
