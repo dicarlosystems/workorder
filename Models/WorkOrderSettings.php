@@ -3,14 +3,12 @@
 namespace Modules\WorkOrder\Models;
 
 use App\Models\EntityModel;
-use Barryvdh\LaravelIdeHelper\Eloquent;
 use Laracasts\Presenter\PresentableTrait;
-use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class WorkOrderSettings extends EntityModel
 {
     use PresentableTrait;
-    use SoftDeletes;
 
     /**
      * @var string
@@ -24,7 +22,6 @@ class WorkOrderSettings extends EntityModel
         'work_order_number_counter',
         'work_order_number_prefix',
         'work_order_number_pattern',
-        'work_order_number_padding',
         'account_id'
     ];
 

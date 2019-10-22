@@ -21,6 +21,8 @@ $LANG = array(
     'add_note' => 'Add Note',
     'work_order_number' => 'Work Order Number',
     'intake_form' => 'Intake Form',
+    'work_order_number_help' => 'Specify a prefix or use a custom pattern to dynamically set the work order number.',
+    'next_work_order_number' => 'The next work order number is :number.',
 );
 
 return $LANG;

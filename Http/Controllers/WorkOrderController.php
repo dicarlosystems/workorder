@@ -6,10 +6,13 @@ use App\Http\Controllers\BaseController;
 use App\Models\Client;
 use App\Services\DatatableService;
 use Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Modules\WorkOrder\Datatables\WorkOrderDatatable;
 use Modules\WorkOrder\Http\Requests\CreateWorkOrderRequest;
 use Modules\WorkOrder\Http\Requests\UpdateWorkOrderRequest;
 use Modules\WorkOrder\Http\Requests\WorkOrderRequest;
+use Modules\WorkOrder\Models\WorkOrder;
 use Modules\WorkOrder\Models\WorkOrderNote;
 use Modules\WorkOrder\Repositories\WorkOrderRepository;
 use Modules\WorkOrder\Services\WorkOrderService;
@@ -253,16 +256,39 @@ class WorkOrderController extends BaseController
             ->with('message', mtrans('workorder', $action . '_workorder_complete'));
     }
 
-    public function saveSettings() {
+    public function saveSettings(Request $request) {
+        $account = Auth::user()->account;
 
+        $settings = $this->workorderService->getSettings($account);
+
+        $settings->work_order_number_counter = $request->input('work_order_number_counter');
+        
+        if ($request->input("work_order_number_type") == 'prefix') {
+            $settings->work_order_number_prefix = trim($request->input('work_order_number_prefix'));
+            $settings->work_order_number_pattern = null;
+        } else {
+            $settings->work_order_number_prefix = null;
+            $settings->work_order_number_pattern = trim($request->input('work_order_number_pattern'));
+        }
+
+        $settings->save();
+
+        return Redirect::to('settings/workorder');
     }
 
     public function showSettings()
     {
         $account = Auth::user()->account;
+        $settings = $this->workorderService->getSettings($account);
+        $nextNumberPreview = $this->workorderService->previewNextNumber();
+
+        $patternFields = WorkOrder::$patternFields;
 
         return view('workorder::settings', [
-            'account' => $account
+            'account' => $account,
+            'settings' => $settings,
+            'nextNumberPreview' => $nextNumberPreview,
+            'patternFields' => $patternFields,
         ]);
     }
 }

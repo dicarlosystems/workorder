@@ -3,8 +3,8 @@
 namespace Modules\WorkOrder\Models;
 
 use App\Models\EntityModel;
-use Laracasts\Presenter\PresentableTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laracasts\Presenter\PresentableTrait;
 
 class WorkOrder extends EntityModel
 {
@@ -36,6 +36,16 @@ class WorkOrder extends EntityModel
     protected $casts = [
         'intake_data' => 'array',
         'intake_form' => 'array'
+    ];
+
+    public static $patternFields = [
+        'counter',
+        'clientIdNumber',
+        'clientCustom1',
+        'clientCustom2',
+        'userId',
+        'year',
+        'date:',
     ];
 
     /**

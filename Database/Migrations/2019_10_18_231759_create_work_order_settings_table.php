@@ -18,12 +18,10 @@ class CreateWorkOrderSettingsTable extends Migration
             $table->unsignedInteger('work_order_number_counter')->default(1);
             $table->string('work_order_number_pattern', 255)->nullable();
             $table->string('work_order_number_prefix', 255)->nullable();
-            $table->unsignedTinyInteger('work_order_number_padding')->nullable();
+            // $table->unsignedTinyInteger('work_order_number_padding')->nullable();
             $table->mediumText('intake_form')->nullable();
 
             $table->timestamps();
-            $table->softDeletes();
-            $table->boolean('is_deleted')->default(false);
 
             $table->foreign('account_id')->references('id')->on('accounts')->onDelete('cascade');
         });
