@@ -1,10 +1,10 @@
 {
-    "name": "invoiceninja/workorder",
+    "name": "dicarlosystems/workorder",
     "description": "",
     "authors": [
         {
-            "name": "Hillel Coren",
-            "email": "contact@invoiceninja.com"
+            "name": "Christopher Di Carlo",
+            "email": "info@dicarlosystems.com"
         }
     ],
     "autoload": {
