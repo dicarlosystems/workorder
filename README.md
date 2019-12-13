@@ -9,7 +9,7 @@ This module adds work orders functionality to Invoice Ninja.
 ## Installation
 
 ```
-php artisan module:install dicarlosystems/workorder --type=github
+php artisan module:install dicarlosystems/workorder --type=github-https
 ```
 
 After installing, run the migrations:
