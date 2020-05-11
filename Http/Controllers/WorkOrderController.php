@@ -63,9 +63,8 @@ class WorkOrderController extends BaseController
      */
     public function create(WorkOrderRequest $request)
     {
-        $clients = Client::all()->map(function($item) {
-            return ['value' => $item->name . ' - ' . $item->id_number, 'key' => $item->id];
-        })->pluck('value', 'key');
+        $account = Auth::user()->account;
+        $clients = $account->clients;
 
         $data = [
             'workorder' => null,
